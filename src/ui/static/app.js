@@ -11,6 +11,7 @@ let sessionId = null;
 function addMessage(role, content) {
   const item = document.createElement("div");
   item.className = `message ${role}`;
+  item.setAttribute("role", "listitem");
   item.textContent = content;
   messages.appendChild(item);
   messages.scrollTop = messages.scrollHeight;
@@ -19,7 +20,14 @@ function addMessage(role, content) {
 function setBusy(isBusy) {
   input.disabled = isBusy;
   form.querySelector("button").disabled = isBusy;
-  statusEl.textContent = isBusy ? "Working" : "Ready";
+  form.setAttribute("aria-busy", String(isBusy));
+  if (isBusy) {
+    statusEl.textContent = "Working";
+    statusEl.dataset.state = "working";
+  } else if (statusEl.textContent === "Working" || statusEl.textContent === "Starting") {
+    statusEl.textContent = "Ready";
+    statusEl.dataset.state = "ready";
+  }
 }
 
 async function startSession() {
@@ -56,6 +64,7 @@ async function sendMessage(message) {
     downloadLink.classList.remove("hidden");
   }
   statusEl.textContent = `${data.state} | ${data.question_count}/5`;
+  statusEl.dataset.state = data.state;
   setBusy(false);
   input.focus();
 }
@@ -82,4 +91,3 @@ startSession().catch(() => {
   addMessage("agent", "The app could not start a session. Please refresh.");
   setBusy(false);
 });
-

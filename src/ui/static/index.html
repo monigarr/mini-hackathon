@@ -8,37 +8,82 @@
   </head>
   <body>
     <main class="shell">
-      <section class="panel" aria-label="Tax filing chat">
-        <header class="topbar">
-          <div>
-            <h1>Agentic Tax-Filing Assistant</h1>
-            <p>Fake W-2 demo data only. Prototype, not tax advice or e-filing.</p>
+      <section class="dashboard" aria-label="Tax filing dashboard">
+        <header class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">2025 Form 1040 prototype</p>
+            <h1>Tax Filing Review Gate</h1>
+            <p class="lede">
+              A bounded agentic chat that turns fake W-2 data into a downloadable draft Form 1040.
+            </p>
           </div>
-          <div class="status" id="status">Starting</div>
+          <div class="status-card" aria-label="Session status">
+            <span class="status-label">Session</span>
+            <span class="status" id="status">Starting</span>
+          </div>
         </header>
 
-        <div class="messages" id="messages" aria-live="polite"></div>
-
-        <div class="actions">
-          <button type="button" id="sampleButton">Use sample W-2</button>
-          <a id="downloadLink" class="hidden" href="#">Download 1040</a>
-          <a id="observationsLink" class="hidden" href="#" target="_blank" rel="noreferrer">
-            View observations
-          </a>
+        <div class="metrics" aria-label="Prototype constraints">
+          <div class="metric">
+            <span class="metric-value">5</span>
+            <span class="metric-label">question limit</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">W-2</span>
+            <span class="metric-label">single fake input</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">PDF</span>
+            <span class="metric-label">visible 1040 output</span>
+          </div>
         </div>
 
-        <form class="composer" id="chatForm">
-          <label class="sr-only" for="messageInput">Message</label>
-          <input
-            id="messageInput"
-            name="message"
-            type="text"
-            autocomplete="off"
-            placeholder="Type your answer..."
-            required
-          />
-          <button type="submit">Send</button>
-        </form>
+        <section class="panel" aria-label="Tax filing chat">
+          <div class="panel-header">
+            <div>
+              <h2>Guided filing conversation</h2>
+              <p>Fake W-2 demo data only. Prototype, not tax advice or e-filing.</p>
+            </div>
+          </div>
+
+          <div
+            class="messages"
+            id="messages"
+            role="list"
+            aria-live="polite"
+            aria-label="Conversation transcript"
+          ></div>
+
+          <div class="command-bar" aria-label="Session actions">
+            <button type="button" id="sampleButton" class="button button-secondary">
+              Use sample W-2
+            </button>
+            <a id="downloadLink" class="button button-primary hidden" href="#">Download 1040</a>
+            <a
+              id="observationsLink"
+              class="button button-ghost hidden"
+              href="#"
+              target="_blank"
+              rel="noreferrer"
+            >
+              View observations
+            </a>
+          </div>
+
+          <form class="composer" id="chatForm">
+            <label class="sr-only" for="messageInput">Message</label>
+            <input
+              id="messageInput"
+              name="message"
+              type="text"
+              autocomplete="off"
+              placeholder="Type your answer..."
+              aria-label="Message"
+              required
+            />
+            <button type="submit" class="button button-primary">Send</button>
+          </form>
+        </section>
       </section>
     </main>
     <script src="/static/app.js"></script>
