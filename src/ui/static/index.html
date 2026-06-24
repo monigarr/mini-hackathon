@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agentic Tax-Filing Assistant</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel" aria-label="Tax filing chat">
+        <header class="topbar">
+          <div>
+            <h1>Agentic Tax-Filing Assistant</h1>
+            <p>Fake W-2 demo data only. Prototype, not tax advice or e-filing.</p>
+          </div>
+          <div class="status" id="status">Starting</div>
+        </header>
+
+        <div class="messages" id="messages" aria-live="polite"></div>
+
+        <div class="actions">
+          <button type="button" id="sampleButton">Use sample W-2</button>
+          <a id="downloadLink" class="hidden" href="#">Download 1040</a>
+          <a id="observationsLink" class="hidden" href="#" target="_blank" rel="noreferrer">
+            View observations
+          </a>
+        </div>
+
+        <form class="composer" id="chatForm">
+          <label class="sr-only" for="messageInput">Message</label>
+          <input
+            id="messageInput"
+            name="message"
+            type="text"
+            autocomplete="off"
+            placeholder="Type your answer..."
+            required
+          />
+          <button type="submit">Send</button>
+        </form>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

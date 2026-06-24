@@ -1,11 +1,11 @@
 
-# ============================================================================
+============================================================================
 # PROJECT ARCHITECTURE
 # ============================================================================
 # Project Name: Agentic Tax-Filing Assistant
 # Repository: agentic-tax-assistant
 # Version: 1.0.0
-# Status: Production-Ready Prototype
+# Status: Working Local Prototype
 # Classification: Internal/Educational
 # Authors: Monica Peters, monigarr@monigarr.com
 # Organization: Gauntlet AI for America, Mini Hackathon June 24th 2026
@@ -49,10 +49,11 @@ processes. Specifically, it provides a conversational interface for filing a
 simple U.S. federal tax return (Form 1040) for a W-2 employee earning
 approximately $40,000/year.
 
-The system orchestrates an LLM to conduct a guided conversation, collects
-structured data through deterministic tool calls, generates a filled PDF
-tax form, and provides a downloadable result—all within a 5-question budget
-and a warm, human-like interaction.
+The implemented v1 system uses a deterministic state machine to conduct the
+guided conversation, collects structured data through code-enforced tools,
+generates a filled PDF tax form, and provides a downloadable result within a
+5-question budget. LLM integration remains optional future polish; the judged
+flow works without a model call.
 
 ## Business Objective
 
@@ -72,7 +73,8 @@ and a warm, human-like interaction.
 This project follows:
 
 - AI-First Engineering: AI participates in planning, analysis, and execution.
-- AI-Native Architecture: LLMs are core orchestration engines, not add-ons.
+- AI-Native Architecture: agentic orchestration is explicit and observable;
+  deterministic code enforces the safety-critical flow.
 - Human-in-the-loop accountability: Humans remain accountable for validation
   and final decisions.
 - Sovereign engineering principles: Clear ownership, documentation, and
@@ -104,8 +106,8 @@ This system integrates:
   PDF generation tools that ensure mathematical accuracy.
 - **Human Contextual Reasoning:** The conversation is designed to feel
   warm and human, gathering information in a natural way.
-- **Artificial Intelligence Acceleration:** An LLM orchestrates the
-  conversation, interprets user inputs, and guides the interaction.
+- **Artificial Intelligence Acceleration:** LLM-based wording can be added
+  later, but v1 keeps parsing, validation, and orchestration deterministic.
 
 All three layers are visible and auditable through the observation system.
 
@@ -545,13 +547,13 @@ All AI outputs are:
 | Environment | Purpose            | URL |
 | ----------- | ------------------ | --- |
 | Local       | Development        | http://localhost:8000 |
-| Production  | Live operations    | https://tax-assistant.onrender.com |
+| Production  | Render deployment target | Pending public URL |
 
 ## CI/CD Philosophy
 
 - **Automated Validation:** Run tests on push
-- **Security Scanning:** Dependabot for dependencies
-- **Reproducible Builds:** Requirements.txt or pyproject.toml
+- **Security Scanning:** GitLab SAST and secret detection
+- **Reproducible Builds:** `requirements.txt`
 - **Rollback Support:** Git revert and redeploy
 - **Artifact Traceability:** Git commits map to deployed versions
 
@@ -559,7 +561,7 @@ All AI outputs are:
 
 1. **Dependencies:** Defined in requirements.txt
 2. **Build Command:** `pip install -r requirements.txt`
-3. **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+3. **Start Command:** `uvicorn src.main:app --host 0.0.0.0 --port $PORT`
 4. **Environment Variables:** Set in Render dashboard
 5. **Health Check:** `/health` endpoint
 
@@ -569,9 +571,9 @@ All AI outputs are:
 services:
   - type: web
     name: agentic-tax-assistant
-    runtime: python
+    env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -582,8 +584,9 @@ services:
 ## .env File (Local Development)
 
 ```
-OPENAI_API_KEY=your_key_here
 ENVIRONMENT=development
+PORT=8000
+OPENAI_API_KEY=
 ```
 
 ## .gitignore
@@ -642,10 +645,10 @@ htmlcov/
 - **Rationale:** Simple, no persistence needed
 - **Future:** Add Redis for production scaling
 
-### 3. Single LLM Provider
-- **Decision:** Use OpenAI API
-- **Rationale:** Reliable, well-supported
-- **Future:** Support multiple providers (Anthropic, local)
+### 3. Optional LLM Provider
+- **Decision:** Keep v1 functional without an LLM call
+- **Rationale:** The judged flow must work even without network/model access
+- **Future:** Add OpenAI wording polish if time remains
 
 ### 4. No User Authentication
 - **Decision:** No login required
@@ -653,8 +656,8 @@ htmlcov/
 - **Future:** Add authentication for real deployment
 
 ### 5. PDF Generation Method
-- **Decision:** Use fillable PDF with PyPDF2/PyMuPDF
-- **Rationale:** Simple, no server-side rendering
+- **Decision:** Use the local fillable `docs/1040_V2025.pdf` with `pypdf`
+- **Rationale:** The provided 2025 Form 1040 template has usable AcroForm fields
 - **Future:** Use HTML-to-PDF for more flexibility
 
 ### 6. Hard-Coded Tax Tables
@@ -664,10 +667,10 @@ htmlcov/
 
 ## Technical Debt
 
-- No comprehensive test suite (basic tests only)
+- No public Render smoke test captured yet
 - No rate limiting for API calls
 - No monitoring or alerting
-- No backup LLM provider
+- Optional LLM polish is not implemented
 
 # 16. Forward Path
 
@@ -842,9 +845,9 @@ This system is designed according to:
 The system prioritizes:
 - **Human accountability:** Users review their form, judges evaluate the system
 - **Sovereign engineering:** Clear ownership, documentation, and handoff
-- **Operational continuity:** Deployed and working end-to-end
+- **Operational continuity:** Render-ready and working end-to-end locally
 - **Enterprise reliability:** Tested, verified, and observable
-- **Scalable intelligence orchestration:** LLM orchestrates conversation
+- **Scalable intelligence orchestration:** Deterministic harness with optional LLM polish
 - **Long-term maintainability:** Clean architecture, comprehensive docs
 
 **AI accelerates engineering.**
@@ -880,42 +883,47 @@ agentic-tax-assistant/
 │   ├── conversation/
 │   │   ├── __init__.py
 │   │   ├── engine.py           # Conversation orchestration
-│   │   ├── state_machine.py    # Question flow state machine
+│   │   ├── guardrails.py       # Scope and safety checks
 │   │   └── prompts.py          # System prompts and templates
 │   ├── tools/
 │   │   ├── __init__.py
 │   │   ├── validate_w2.py      # W-2 data validation
-│   │   ├── generate_1040.py    # Tax computation and PDF generation
+│   │   ├── generate_1040.py    # PDF generation
 │   │   └── logger.py           # Observation logging
 │   ├── models/
 │   │   ├── __init__.py
 │   │   ├── tax_data.py         # Data classes for tax info
 │   │   └── session.py          # Session state management
 │   ├── ui/
-│   │   ├── __init__.py
-│   │   ├── static/             # HTML, CSS, JS
-│   │   └── templates/          # Jinja2 templates
+│   │   └── static/             # HTML, CSS, JS
 │   └── utils/
 │       ├── __init__.py
 │       ├── config.py           # Environment configuration
-│       └── pdf_utils.py        # PDF generation helpers
+│       └── tax_tables.py       # 2025 tax computation
 ├── tests/
-│   ├── test_tax_computation.py
+│   ├── test_api.py
+│   ├── test_conversation.py
+│   ├── test_pdf_generation.py
+│   ├── test_tax_tables.py
 │   ├── test_validation.py
-│   └── test_end_to_end.py
 ├── data/
-│   ├── w2_sample.json          # Sample W-2 data for testing
-│   └── form_1040_template.pdf  # 2025 Form 1040 template
+│   └── w2_sample.json          # Sample W-2 data for testing
 ├── docs/
+│   ├── 1040_V2025.pdf          # 2025 Form 1040 template
+│   ├── API.md                  # API documentation
 │   ├── ARCHITECTURE.md         # This document
-│   ├── DECISIONS.md            # Design decisions
-│   └── API.md                  # API documentation
+│   ├── CLIENT_REQUEST.md       # Challenge source
+│   ├── PRD.md                  # Product requirements
+│   └── USERS.md                # Persona and use cases
 ├── .env.example                # Example environment variables
 ├── .gitignore
+├── .gitlab-ci.yml
+├── BUILD_PLAN.md
+├── DECISIONS.md                # Design decisions
+├── LICENSE
 ├── render.yaml
 ├── requirements.txt
-├── README.md
-└── LICENSE
+└── README.md
 ```
 
 ## B. Key Technologies
@@ -923,9 +931,9 @@ agentic-tax-assistant/
 | Component | Technology | Justification |
 |-----------|------------|---------------|
 | **Web Framework** | FastAPI | Async support, auto-docs, lightweight |
-| **LLM Provider** | OpenAI GPT-4o-mini | Good balance of cost and quality |
-| **LLM Orchestration** | LangChain or Direct API | Simplicity vs. flexibility tradeoff |
-| **PDF Generation** | PyPDF2/PyMuPDF | Fill existing PDF forms |
+| **LLM Provider** | Optional OpenAI later | V1 works without model/network dependency |
+| **Orchestration** | Deterministic state machine | Enforces 5-question budget and guardrails |
+| **PDF Generation** | pypdf | Fills local 2025 Form 1040 AcroForm fields |
 | **Frontend** | Vanilla HTML/CSS/JS | Minimal, accessible, no framework needed |
 | **Deployment** | Render | Free tier, easy deployment |
 | **Testing** | Pytest | Standard, simple |
@@ -935,9 +943,9 @@ agentic-tax-assistant/
 
 | Decision | Alternative | Rationale | Impact |
 |----------|-------------|-----------|--------|
-| Use OpenAI | Local model | Reliability, quality | API cost, internet dependency |
+| Deterministic v1 | LLM-first flow | Reliability, bounded behavior | Less free-form conversation |
 | In-memory state | Redis | Simplicity | Limited scalability |
 | 5 questions | 10 questions | Constraint from spec | Forces tight conversation design |
 | Single W-2 | Multiple W-2s | Simplicity | Limited tax scope |
 | Vanilla frontend | React/Next.js | Focus on backend | Less polished UI |
-| Fillable PDF | Generate from scratch | Simplicity | Limited formatting flexibility |
+| Fillable PDF | Generate from scratch | Uses provided 1040 template | Field-map maintenance |

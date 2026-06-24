@@ -8,6 +8,17 @@
 stages:
 - test
 - secret-detection
+
+python_tests:
+  stage: test
+  image: python:3.12
+  before_script:
+  - python -m pip install --upgrade pip
+  - python -m pip install -r requirements.txt
+  script:
+  - python -m py_compile src/main.py src/conversation/engine.py src/conversation/guardrails.py src/conversation/prompts.py src/models/session.py src/models/tax_data.py src/tools/generate_1040.py src/tools/logger.py src/tools/validate_w2.py src/utils/config.py src/utils/tax_tables.py
+  - python -m pytest -q
+
 sast:
   stage: test
 include:

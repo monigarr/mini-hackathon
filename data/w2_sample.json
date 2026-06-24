@@ -1,0 +1,7 @@
+{
+  "employer_name": "Acme Corporation",
+  "box1_wages": 40000.0,
+  "box2_federal_withheld": 2400.0,
+  "box4_social_security_wages": 40000.0,
+  "box6_medicare_wages": 40000.0
+}
