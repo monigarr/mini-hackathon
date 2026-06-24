@@ -1,93 +1,505 @@
-# mini-hackathon
+# AGENTIC TAX-FILING ASSISTANT
 
+> **Hackathon Challenge — June 24, 2026**  
+> *A conversational AI agent that helps W-2 earners file their 2025 Form 1040*
 
+[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-orange.svg)](https://openai.com)
+[![Render](https://img.shields.io/badge/Render-Deployed-purple.svg)](https://render.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 📋 Table of Contents
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [The Four Pillars](#the-four-pillars)
+- [Quick Start](#quick-start)
+- [Deployment](#deployment)
+- [Testing](#testing)
+- [Project Structure](#project-structure)
+- [Technologies](#technologies)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Add your files
+---
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## 🎯 Overview
+
+**The Agentic Tax-Filing Assistant** is an AI-native, enterprise-grade prototype designed for the June 24, 2026 Mini Hackathon. It demonstrates how a conversational AI agent can transform a complex, manual process—filing a U.S. federal tax return—into a simple, friendly 5-question conversation.
+
+### Business Objective
+
+- **Problem:** Filing Form 1040 is complex, error-prone, and overwhelming for first-time filers
+- **Solution:** A guided, warm conversational experience that collects data and generates a completed form
+- **Value:** Proves the viability of agentic systems for step-by-step processes with safety and observability
+
+### Status
+
+- **Version:** 1.0.0 (Production-Ready Prototype)
+- **Status:** Active Development
+- **Deployment:** [Live Demo](https://agentic-tax-assistant.onrender.com)
+
+---
+
+## ✨ Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Web Chat Interface** | Simple, accessible chat interface for tax filing |
+| **5-Question Budget** | Maximum 5 questions to gather all required data |
+| **W-2 Data Collection** | Validates and stores W-2 Boxes 1, 2, 4, and 6 |
+| **Filing Status Support** | Handles "Single" and "Married Filing Jointly" |
+| **Dependency Status** | Determines if filer can be claimed as dependent |
+| **Tax Computation** | Uses 2025 tax tables and standard deduction |
+| **PDF Generation** | Populates a 2025 Form 1040 PDF with computed values |
+| **Downloadable Output** | Users download their completed form instantly |
+| **Full Observability** | Structured JSON logging of all agent decisions |
+| **Guardrails** | Prevents off-topic responses and tax advice |
+| **Human-Friendly Tone** | Warm, empathetic, and clear communication |
+
+---
+
+## 🏗️ Architecture
+
+### Architectural Style: Modular Monolith with AI Orchestration
 
 ```
-cd existing_repo
-git remote add origin https://labs.gauntletai.com/monicapeters/mini-hackathon.git
-git branch -M main
-git push -uf origin main
+┌─────────────────────────────────────────────────────────────┐
+│                    Client Browser                           │
+│               (Web Chat Interface)                          │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      FastAPI Server                         │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐          │
+│  │   Routes   │  │  Session   │  │   Static   │          │
+│  │  (API)     │  │  Manager   │  │   Files    │          │
+│  └────────────┘  └────────────┘  └────────────┘          │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Orchestration Layer                       │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │               Conversation Engine                    │  │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐   │  │
+│  │  │   State    │  │   Prompt   │  │ Question   │   │  │
+│  │  │  Machine   │  │  Builder   │  │  Counter   │   │  │
+│  │  └────────────┘  └────────────┘  └────────────┘   │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                          │                                  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │                 LLM Orchestrator                     │  │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐   │  │
+│  │  │   Model    │  │   Prompt   │  │  Response  │   │  │
+│  │  │  Router    │  │  Template  │  │  Parser    │   │  │
+│  │  └────────────┘  └────────────┘  └────────────┘   │  │
+│  └──────────────────────────────────────────────────────┘  │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       Tool Layer                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
+│  │   Validate   │  │   Generate   │  │   Logging    │    │
+│  │   W-2 Data   │  │   Form 1040  │  │   Tool       │    │
+│  └──────────────┘  └──────────────┘  └──────────────┘    │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                Data & Computation Layer                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
+│  │   Tax        │  │   PDF        │  │   Form       │    │
+│  │  Computation │  │  Generator   │  │  Template    │    │
+│  └──────────────┘  └──────────────┘  └──────────────┘    │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Integrate with your tools
+### Design Principles (M.O.M. + M.I.L.E.)
 
-* [Set up project integrations](https://labs.gauntletai.com/monicapeters/mini-hackathon/-/settings/integrations)
+- **Human Accountability First:** AI accelerates, humans validate
+- **Ancient + Human + AI Integration:** Deterministic logic + human-like conversation + LLM orchestration
+- **Enterprise from Day One:** Security, maintainability, observability built in
+- **Documentation as Infrastructure:** Comprehensive docs for rapid handoff
+- **Handoff-Ready Engineering:** Clean interfaces, one-command setup
 
-## Collaborate with your team
+---
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+## 🧩 The Four Pillars
 
-## Test and Deploy
+This system demonstrates the four essential pillars of agentic systems:
 
-Use the built-in continuous integration in GitLab.
+### 1. Chat Loop
+- Web-based conversational interface with state management across turns
+- Session ID tracking for continuity
+- Warm, human-like interaction design
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+### 2. Tools
+- **`validate_w2`**: Validates W-2 data structure and types
+- **`generate_1040`**: Computes tax, fills PDF, generates download link
+- **`log_observation`**: Logs all agent decisions and actions
 
-***
+### 3. Guardrails
+- **5-Question Budget:** Strict counter enforced by state machine
+- **Off-Topic Prevention:** Politely declines irrelevant questions
+- **No Tax Advice:** Clear disclaimer and prompt constraints
+- **Input Validation:** All W-2 data validated before use
 
-# Editing this README
+### 4. Observation
+- Structured JSON logging of all events
+- Session ID correlation for audit trails
+- Full conversation transcripts
+- Tool call logs with inputs and outputs
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+---
 
-## Suggestions for a good README
+## 🚀 Quick Start
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Prerequisites
 
-## Name
-Choose a self-explaining name for your project.
+- Python 3.10 or higher
+- OpenAI API key (or compatible LLM provider)
+- Git
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Local Development
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+1. **Clone the repository:**
+```bash
+git clone https://github.com/yourusername/agentic-tax-assistant.git
+cd agentic-tax-assistant
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+2. **Set up virtual environment:**
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+3. **Install dependencies:**
+```bash
+pip install -r requirements.txt
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+4. **Configure environment variables:**
+```bash
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+5. **Run the application:**
+```bash
+uvicorn src.main:app --reload
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+6. **Open the chat:**
+```
+http://localhost:8000
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+---
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## 🌐 Deployment
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Deploy to Render (Recommended)
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+1. **Push your code to GitHub**
 
-## License
-For open source projects, say how it is licensed.
+2. **Create a new Web Service on Render:**
+   - Connect your GitHub repository
+   - Use the following settings:
+     - **Build Command:** `pip install -r requirements.txt`
+     - **Start Command:** `uvicorn src.main:app --host 0.0.0.0 --port $PORT`
+     - **Environment Variables:**
+       - `OPENAI_API_KEY`: Your OpenAI API key
+       - `ENVIRONMENT`: `production`
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+3. **Deploy:**
+   - Render will automatically deploy on push
+   - Your app will be available at `https://your-app.onrender.com`
+
+### One-Command Local Run
+
+```bash
+OPENAI_API_KEY=your_key_here uvicorn src.main:app --reload
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OPENAI_API_KEY` | Yes | Your OpenAI API key |
+| `ENVIRONMENT` | No | `development` or `production` (default: development) |
+| `PORT` | No | Port for server (default: 8000) |
+
+---
+
+## 🧪 Testing
+
+### Run Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=src tests/
+
+# Run specific test file
+pytest tests/test_tax_computation.py
+```
+
+### Test Categories
+
+| Category | Description | File |
+|----------|-------------|------|
+| **Unit Tests** | Tax computation, validation, PDF utilities | `test_tax_computation.py` |
+| **Integration Tests** | End-to-end chat with mock LLM | `test_end_to_end.py` |
+| **Edge Cases** | Invalid inputs, married filing, dependent status | `test_validation.py` |
+
+### Sample W-2 Data
+
+Sample data is provided in `data/w2_sample.json` for testing:
+
+```json
+{
+  "employer_name": "Acme Corporation",
+  "employer_ein": "12-3456789",
+  "employee_name": "Jane Doe",
+  "employee_address": "123 Main St, Anytown, USA",
+  "wages": 40000.00,
+  "federal_tax_withheld": 2400.00,
+  "social_security_wages": 40000.00,
+  "social_security_tax": 2480.00,
+  "medicare_wages": 40000.00,
+  "medicare_tax": 580.00
+}
+```
+
+---
+
+## 📁 Project Structure
+
+```
+agentic-tax-assistant/
+├── src/
+│   ├── __init__.py
+│   ├── main.py                 # FastAPI app entry point
+│   ├── conversation/
+│   │   ├── __init__.py
+│   │   ├── engine.py           # Conversation orchestration
+│   │   ├── state_machine.py    # Question flow state machine
+│   │   └── prompts.py          # System prompts and templates
+│   ├── tools/
+│   │   ├── __init__.py
+│   │   ├── validate_w2.py      # W-2 data validation
+│   │   ├── generate_1040.py    # Tax computation and PDF generation
+│   │   └── logger.py           # Observation logging
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── tax_data.py         # Data classes for tax info
+│   │   └── session.py          # Session state management
+│   ├── ui/
+│   │   ├── __init__.py
+│   │   ├── static/             # HTML, CSS, JS
+│   │   └── templates/          # Jinja2 templates
+│   └── utils/
+│       ├── __init__.py
+│       ├── config.py           # Environment configuration
+│       └── pdf_utils.py        # PDF generation helpers
+├── tests/
+│   ├── test_tax_computation.py
+│   ├── test_validation.py
+│   └── test_end_to_end.py
+├── data/
+│   ├── w2_sample.json          # Sample W-2 data for testing
+│   └── form_1040_template.pdf  # 2025 Form 1040 template
+├── docs/
+│   ├── ARCHITECTURE.md         # Comprehensive architecture
+│   ├── DECISIONS.md            # Design decisions
+│   └── API.md                  # API documentation
+├── .env.example                # Example environment variables
+├── .gitignore                  # Git ignore file
+├── render.yaml                 # Render deployment configuration
+├── requirements.txt            # Python dependencies
+├── README.md                   # This file
+└── LICENSE                     # MIT License
+```
+
+---
+
+## 🛠️ Technologies
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Web Framework** | FastAPI 0.115+ | Async API, auto-docs, lightweight |
+| **LLM Provider** | OpenAI GPT-4o-mini | Cost-effective, high-quality conversation |
+| **LLM Orchestration** | Direct API or LangChain | Conversational orchestration |
+| **PDF Generation** | PyPDF2 / PyMuPDF | Fill existing PDF forms |
+| **Frontend** | Vanilla HTML/CSS/JS | Minimal, accessible interface |
+| **Deployment** | Render | Free tier, easy deployment |
+| **Testing** | Pytest | Standard, comprehensive testing |
+| **Environment** | Python 3.10+ | Modern, widely supported |
+| **Logging** | Python logging + JSON | Structured observability |
+
+---
+
+## 🔒 Security & Compliance
+
+### Data Protection
+
+- **No PII Storage:** All data is ephemeral; no persistence
+- **Environment Variables:** All secrets in `.env`, never in code
+- **HTTPS:** Enforced via Render
+- **Input Validation:** All user inputs validated before use
+- **Session Isolation:** Each session has unique ID
+
+### Compliance
+
+- **Disclaimer:** System explicitly states it's a prototype, not a professional service
+- **Educational Use:** Not a real tax preparation service
+- **No E-Filing:** System does not transmit to IRS
+- **Fake Data Only:** Test data is synthetic; no real filings
+
+### Security Best Practices
+
+- ✅ Prompt injection mitigation
+- ✅ Input sanitization
+- ✅ Environment-based configuration
+- ✅ Dependency scanning (Dependabot)
+- ✅ Rate limiting (via Render)
+- ✅ Health checks
+
+---
+
+## 📊 Observability
+
+### Logging
+
+All system events are logged in structured JSON format:
+
+```json
+{
+  "timestamp": "2026-06-24T10:00:00Z",
+  "session_id": "abc123",
+  "event_type": "llm_call",
+  "event_data": {
+    "prompt": "...",
+    "response": "...",
+    "token_usage": { "prompt": 150, "completion": 50 }
+  }
+}
+```
+
+### Metrics Tracked
+
+- LLM call latency
+- Token usage per conversation
+- Question count
+- Tool success/failure rates
+- Conversation duration
+- Error rates
+
+---
+
+## 🤝 Contributing
+
+### Development Workflow
+
+1. **Fork the repository**
+2. **Create a feature branch:** `git checkout -b feature/your-feature`
+3. **Make your changes** (include tests and documentation)
+4. **Run tests:** `pytest`
+5. **Commit your changes:** `git commit -m "feat: add your feature"`
+6. **Push to the branch:** `git push origin feature/your-feature`
+7. **Create a Pull Request**
+
+### Coding Standards
+
+- **Style:** PEP 8 with Black formatting
+- **Docstrings:** All functions must have docstrings
+- **Type Hints:** Use Python type hints
+- **Headers:** Include the standard code comment header
+- **Tests:** New features must include tests
+
+### Reporting Issues
+
+- Use the GitHub Issues tracker
+- Include: steps to reproduce, expected behavior, actual behavior
+- For security issues, contact directly
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+```
+MIT License
+
+Copyright (c) 2026 Monica Peters
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+---
+
+## 📚 Documentation
+
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Comprehensive system architecture
+- **[PRD.md](docs/PRD.md)** — Product requirements document
+- **[DECISIONS.md](docs/DECISIONS.md)** — Design decisions and rationale
+- **[API.md](docs/API.md)** — API documentation
+- **[USERS.md](docs/USERS.md)** — User personas and use cases
+
+---
+
+## 🙏 Acknowledgments
+
+- **Hackathon Challenge:** Gauntlet AI for America, Mini Hackathon June 24, 2026
+- **Architecture Framework:** MoniGarr Operating Model (M.O.M.) + M.I.L.E.
+- **Engineering Standards:** Echelon Enterprise Engineering Protocols
+
+---
+
+## 📞 Contact
+
+**Owner:** Monica Peters  
+**Email:** monigarr@monigarr.com  
+**GitHub:** [@monigarr](https://github.com/monigarr)  
+
+---
+
+## ⚡ Quick Links
+
+- [Live Demo](https://agentic-tax-assistant.onrender.com)
+- [GitHub Repository](https://github.com/yourusername/agentic-tax-assistant)
+- [Issue Tracker](https://github.com/yourusername/agentic-tax-assistant/issues)
+- [Documentation](docs/)
+
+---
+
+**Built with ❤️ for the Gauntlet AI for America Mini Hackathon Challenge**
+
+*"AI accelerates engineering. Humans remain accountable. Systems remain governable."*
