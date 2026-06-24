@@ -8,9 +8,9 @@ This is an educational demo. It is not tax advice, not e-filing, and not a profe
 
 - Version: `1.0.0`
 - Current state: working local prototype
-- Public deployment: pending Render deployment
+- Public deployment: no public URL recorded in this repo yet; Render config is present
 - Local app: `http://127.0.0.1:8000`
-- Validation: `16 passed` with `python -m pytest -q`
+- Validation: `17 passed` with `python -m pytest -q`
 - CI: `.gitlab-ci.yml` runs Python compile/tests plus GitLab SAST and secret detection
 
 ## What Works
@@ -22,7 +22,7 @@ This is an educational demo. It is not tax advice, not e-filing, and not a profe
 - Filing status support for `Single` and `Married Filing Jointly`.
 - Dependency status handling.
 - 2025 standard deduction and bracket-based tax computation.
-- Fillable 2025 Form 1040 PDF generation from `docs/1040_V2025.pdf`.
+- Flattened 2025 Form 1040 PDF generation from `docs/1040_V2025.pdf`.
 - Download endpoint for the generated PDF.
 - Structured observation trail for judges.
 - Render deployment config.
@@ -96,7 +96,7 @@ Current test coverage areas:
 - W-2 parsing and validation.
 - Filing status and dependency parsing.
 - 2025 tax computation.
-- PDF byte generation and filled field values.
+- Flattened PDF byte generation and visible overlay values.
 - Conversation happy path.
 - Invalid W-2 recovery.
 - Off-topic redirect.
@@ -182,14 +182,13 @@ In short:
 - Deterministic validation and tax math.
 - No real PII storage.
 - No e-filing.
-- Fill local IRS PDF with `pypdf`.
+- Overlay values on the local IRS PDF with `pypdf` and `reportlab`, then flatten the output.
 - Keep frontend simple because harness quality is the judging priority.
 
 ## Known Remaining Work
 
 - Deploy to Render and smoke test the public URL.
 - Visually inspect the generated browser-downloaded PDF.
-- Decide whether local untracked `docs/1040_V2025_dummy_data.pdf` belongs in the repo.
 - Add optional LLM wording polish only if the deterministic judged flow remains stable.
 
 ## License

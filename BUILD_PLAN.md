@@ -4,7 +4,7 @@
 
 **Status:** Working local prototype implemented
 **Last updated:** 2026-06-24
-**Primary deliverable:** FastAPI web chat that collects fake W-2 data, enforces a 5-question limit, computes simple 2025 Form 1040 values, generates a downloadable filled PDF, and exposes structured observations for judges.
+**Primary deliverable:** FastAPI web chat that collects fake W-2 data, enforces a 5-question limit, computes simple 2025 Form 1040 values, generates a downloadable completed PDF, and exposes structured observations for judges.
 
 This file now reflects the implemented repo state, not the original pre-build roadmap.
 
@@ -21,7 +21,7 @@ This file now reflects the implemented repo state, not the original pre-build ro
 | Filing/dependency parsing | Complete | `parse_filing_status`, `parse_dependency_status` |
 | Guardrails | Complete | `src/conversation/guardrails.py`, scoped redirects, no tax advice flow |
 | 2025 tax math | Complete | `src/utils/tax_tables.py` uses 2025 standard deductions and brackets |
-| PDF generation | Complete | `src/tools/generate_1040.py` fills local `docs/1040_V2025.pdf` with `pypdf` |
+| PDF generation | Complete | `src/tools/generate_1040.py` overlays visible values on local `docs/1040_V2025.pdf` and flattens the output |
 | Observability | Complete | `src/tools/logger.py` structured per-session events exposed by API |
 | Sample data | Complete | `data/w2_sample.json` |
 | Deployment config | Complete | `render.yaml`, `.env.example`, `requirements.txt` |
@@ -44,8 +44,8 @@ This file now reflects the implemented repo state, not the original pre-build ro
 ## Tax And PDF Implementation Notes
 
 - Uses local template: `docs/1040_V2025.pdf`.
-- Uses `pypdf`, not `PyPDF2`.
-- Fills AcroForm fields directly after cloning the PDF form root.
+- Uses `pypdf` and `reportlab`, not `PyPDF2`.
+- Builds a visible overlay for supported Form 1040 lines, merges it onto the local template, and removes form annotations/AcroForm metadata so the result is a flattened PDF.
 - Uses 2025 Form 1040 standard deduction values:
   - `Single`: `$15,750`
   - `Married Filing Jointly`: `$31,500`
@@ -68,7 +68,7 @@ python -m pytest -q
 Result:
 
 ```text
-16 passed
+17 passed
 ```
 
 Local server smoke evidence:
@@ -92,8 +92,6 @@ Expected health response:
 | 1 | Smoke test public URL | Complete a full browser flow and download PDF from Render |
 | 1 | Capture final public URL | Replace local-only deployment notes with the actual URL |
 | 2 | Verify PDF visually | Open downloaded PDF and verify populated 1040 lines |
-| 2 | Review untracked local artifacts | Decide whether `docs/1040_V2025_dummy_data.pdf` should be committed or ignored |
-| 2 | Review existing doc drift | `docs/ARCHITECTURE.md` still has pre-build language and an existing local modification |
 | 3 | Optional LLM polish | Add OpenAI wording layer only if time remains; current judged flow works without it |
 
 ## Acceptance Checklist
@@ -107,8 +105,8 @@ Expected health response:
 - [x] State machine enforces guardrails in code.
 - [x] Structured observations are exposed for judges.
 - [x] Tests cover core happy path and failure modes.
-- [X] Public Render URL deployed and smoke-tested.
-- [X] Final visual PDF review completed on a downloaded browser artifact.
+- [ ] Public Render URL deployed and smoke-tested.
+- [ ] Final visual PDF review completed on a downloaded browser artifact.
 
 ## Key Files
 
