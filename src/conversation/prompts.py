@@ -18,12 +18,12 @@ DISCLAIMER = (
 def ask_w2() -> str:
     """Return the first question asking for W-2 data."""
     return (
-        "Hi, I can help you turn a simple fake W-2 into a draft 2025 Form 1040. "
+        ""
         f"{DISCLAIMER}\n\n"
-        "Question 1 of 5: please share W-2 Box 1 wages and Box 2 federal tax "
-        "withheld. If you have them, include Box 4 Social Security wages and "
-        "Box 6 Medicare wages too. Example: Box 1 40000, Box 2 2400, "
-        "Box 4 40000, Box 6 40000."
+        "Question 1 of 5: A) Your Wages B) Your Federal Tax "
+        "withheld. Optional: C) Your Social Security Wages D) "
+        "Your Medicare Wages. Example: A) 40000, B) 2400, "
+        "C) 40000, D) 40000"
     )
 
 
@@ -49,10 +49,10 @@ def ask_confirmation(w2: W2Data, filing_status: str, is_dependent: bool) -> str:
     dependent_text = "someone can claim you as a dependent" if is_dependent else "you are independent"
     return (
         "Question 4 of 5: just to confirm before I generate the form:\n"
-        f"- W-2 Box 1 wages: ${w2.box1_wages:,.2f}\n"
-        f"- W-2 Box 2 federal tax withheld: ${w2.box2_federal_withheld:,.2f}\n"
-        f"- Filing status: {FILING_STATUS_LABELS[filing_status]}\n"
-        f"- Dependency: {dependent_text}\n\n"
+        f"- A) Your Wages: ${w2.box1_wages:,.2f}\n"
+        f"- B) Your Federal Tax Withheld: ${w2.box2_federal_withheld:,.2f}\n"
+        f"- C)Filing status: {FILING_STATUS_LABELS[filing_status]}\n"
+        f"- D) Dependency: {dependent_text}\n\n"
         "Is that correct?"
     )
 
@@ -68,7 +68,7 @@ def ask_correction() -> str:
 def off_topic_redirect() -> str:
     """Return a scoped redirect for off-topic or advice-seeking messages."""
     return (
-        "That is outside this prototype's scope. I can only collect fake W-2 "
+        "That’s outside this prototype's scope. I can only collect fake W-2 "
         "data for a simple 2025 Form 1040 and generate a downloadable draft. "
         "For tax advice or complex situations, use a qualified tax professional. "
         "Let's stay with the current question."
