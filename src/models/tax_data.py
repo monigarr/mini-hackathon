@@ -51,6 +51,7 @@ class Form1040Values:
     """Computed values that are written to Form 1040."""
 
     filing_status: str
+    is_dependent: bool
     wages: float
     total_income: float
     adjusted_gross_income: float
@@ -62,4 +63,3 @@ class Form1040Values:
     total_payments: float
     refund: float
     amount_owed: float
-

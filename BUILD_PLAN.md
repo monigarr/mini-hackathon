@@ -107,8 +107,8 @@ Expected health response:
 - [x] State machine enforces guardrails in code.
 - [x] Structured observations are exposed for judges.
 - [x] Tests cover core happy path and failure modes.
-- [ ] Public Render URL deployed and smoke-tested.
-- [ ] Final visual PDF review completed on a downloaded browser artifact.
+- [X] Public Render URL deployed and smoke-tested.
+- [X] Final visual PDF review completed on a downloaded browser artifact.
 
 ## Key Files
 

@@ -37,3 +37,23 @@ def test_generated_pdf_has_expected_field_values(tmp_path) -> None:
     assert fields[FIELD_MAP["line_12e_standard_deduction"]]["/V"] == "15750"
     assert fields[FIELD_MAP["line_37_amount_owed"]]["/V"] == "272"
 
+
+def test_generated_pdf_has_visible_overlay_text(tmp_path) -> None:
+    values = compute_form_values(
+        TaxData(
+            w2=W2Data(40000, 2400, 40000, 40000),
+            filing_status="single",
+            is_dependent=False,
+        )
+    )
+    path = tmp_path / "visible.pdf"
+    path.write_bytes(generate_1040(values))
+
+    text = "\n".join(page.extract_text() or "" for page in PdfReader(str(path)).pages)
+
+    assert "40000" in text
+    assert "15750" in text
+    assert "24250" in text
+    assert "2672" in text
+    assert "2400" in text
+    assert "272" in text

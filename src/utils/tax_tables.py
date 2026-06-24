@@ -90,6 +90,7 @@ def compute_form_values(tax_data: TaxData) -> Form1040Values:
     amount_owed = max(0.0, tax - withholding)
     return Form1040Values(
         filing_status=tax_data.filing_status,
+        is_dependent=tax_data.is_dependent,
         wages=wages,
         total_income=wages,
         adjusted_gross_income=wages,
@@ -102,4 +103,3 @@ def compute_form_values(tax_data: TaxData) -> Form1040Values:
         refund=round(refund, 2),
         amount_owed=round(amount_owed, 2),
     )
-
